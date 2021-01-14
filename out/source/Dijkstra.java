@@ -5,6 +5,7 @@ import processing.opengl.*;
 
 import java.util.*; 
 import java.util.*; 
+import java.util.*; 
 
 import java.util.HashMap; 
 import java.util.ArrayList; 
@@ -19,35 +20,36 @@ public class Dijkstra extends PApplet {
 
 
 
-/*int[][] table = {
-    { 0,  6,  0,  2,  0,  0},
-    { 6,  0,  4,  5,  4,  9},
-    { 0,  4,  0,  6,  4,  7},
-    { 2,  5,  6,  0,  9,  0},
-    { 0,  4,  4,  9,  0,  2},
-    { 0,  9,  7,  0,  2,  0}
-};*/
-int[][] table = {
-    { 0,  4,  0,  2,  0,  0},
-    { 4,  1,  5,  0,  0,  0},
-    { 0,  5,  0,  6,  4,  2},
-    { 2,  0,  6,  0,  5,  0},
-    { 0,  0,  4,  5,  0,  5},
-    { 0,  0,  2,  0,  5,  0}
-};
-
-
 public void setup() {
     
-    Graph g = new Graph(table);
+    Graph g = new Graph("graph1.csv");
 
-    Node start = g.getNode('A');
+    
+
+    List<Node> path = getPath(g);
+
+    
+    printNodeList(path, "Shortest path");
+
+
+}
+
+public List<Node> getPath(Graph g) {
+    List<Node> path = new ArrayList<Node>();
+    Node start = g.getFirstNode();
+    
     start.setDistance(0);
     start.finish();
     getPathLength(start, g);
-    println("The shortest distance between 'A' and '" + g.getLastNode().getName() + "' is " + g.getLastNode().getDistance());
+    println("The shortest distance between 'a' and '" + g.getLastNode().getName() + "' is " + g.getLastNode().getDistance());
 
-    printNodeList(getPath(g), "Shortest path");
+    Node currentNode = g.getLastNode();
+    while (currentNode != null) {
+        path.add(currentNode);
+        currentNode = currentNode.getSource();
+    }
+
+    return path;
 }
 
 public void getPathLength(Node current, Graph g) {
@@ -55,7 +57,7 @@ public void getPathLength(Node current, Graph g) {
 
     println("==> Entering Node '" + current.getName() + "'");
 
-     for(Node node : connectedNodes) {
+    for(Node node : connectedNodes) {
         if(node == current.getSource() || node.isFinished()) {
             continue;
         }
@@ -71,28 +73,12 @@ public void getPathLength(Node current, Graph g) {
     }
 
     for(Node node : connectedNodes) {
-        if(node == current.getSource() || node.isFinished()) {
-            continue;
-        }
-
-        if(g.getNearestNode(node).isFinished()) {
+        if(g.getNearestNode(node).isFinished() && !(node == current.getSource() || node.isFinished())) {
             node.finish();
             println("Finished '" + node.getName() + "'");
             getPathLength(node, g);
         }
     }
-}
-
-public List<Node> getPath(Graph g) {
-    List<Node> path = new ArrayList<Node>();
-
-    Node currentNode = g.getLastNode();
-    while (currentNode != null) {
-        path.add(currentNode);
-        currentNode = currentNode.getSource();
-    }
-
-    return path;
 }
 
 public void printNodeList(List<Node> nodes, String label) {
@@ -114,17 +100,35 @@ public class Graph {
         this.table = table;
 
         for(int i = 0; i < numNodes; i++) {
-            this.nodes[i] = new Node((char) ((int) 'A' + i));
+            this.nodes[i] = new Node((char) ((int) 'a' + i));
+        }
+    }
+
+    public Graph(String sourcePath) {
+        Table csv = loadTable(sourcePath, "header");
+        int numNodes = csv.getRowCount();
+        
+        this.table = new int[numNodes][numNodes];
+        this.nodes = new Node[numNodes];
+
+        for(int i = 0; i < numNodes; i++) {
+            char name = (char) ((int) 'a' + i);
+            this.nodes[i] = new Node(name);
+
+            for(int j = 0; j < numNodes; j++) {
+                table[i][j] = csv.getInt(j, Character.toString(name));
+                print(table[i][j] + " ");
+            }
+            print("\n");
         }
     }
 
     public Node getNode(char name) {
-        for(Node node : nodes) {
-            if(node.name == name) {
-                return node;
-            }
-        }
-        return null;
+        return nodes[(int) name - (int) 'a'];
+    }
+
+    public Node getFirstNode() {
+        return nodes[0];
     }
 
     public Node getLastNode() {
@@ -132,40 +136,36 @@ public class Graph {
     }
 
     public int getDistance(Node a, Node b) {
-        int indexA = (int) a.getName() - (int) 'A';
-        int indexB = (int) b.getName() - (int) 'A';
+        int indexA = (int) a.getName() - (int) 'a';
+        int indexB = (int) b.getName() - (int) 'a';
 
         return table[indexA][indexB];
     }
 
     public List<Node> getConnectedNodes(Node node) {
-        Map<Integer, Node> map = new HashMap<Integer,Node>();
+        Map<Integer, Node> map = new TreeMap<Integer,Node>(); //Eine map mit allen verbunden Knoten als Werte und deren Distanzen als Schlüssel (TreeMap, weil die Einträge (im Gegensatz zu HashMaps) automatisch nach den Schlüsseln sortiert werden)
 
         for(int i = 0; i < nodes.length; i++) {
-            int distance = table[i][(int) node.getName() - (int) 'A'];
+            int distance = table[i][(int) node.getName() - (int) 'a'];
             if(distance != 0) {
                 map.put(this.getDistance(node, nodes[i]), nodes[i]);
             }
         }
-        Map<Integer, Node> sortedMap = new TreeMap<Integer, Node>(map);
+
         List<Node> connectedNodes = new ArrayList<Node>();
-
-        for(int key : sortedMap.keySet()) {
-            connectedNodes.add(sortedMap.get(key));
+        for(int key : map.keySet()) {
+            connectedNodes.add(map.get(key));
         }
-
         return connectedNodes;
     }
 
     public Node getNearestNode(Node source) {
         Node nearestNode = null;
         int minDistance = Integer.MAX_VALUE;
+
         for(Node node : this.getConnectedNodes(source)) {
-            if(node.getDistance() == Integer.MAX_VALUE) {
-                continue;
-            }
-            int distance =  node.getDistance() + this.getDistance(source, node);
-            if(distance < minDistance) {
+            int distance = node.getDistance() + this.getDistance(source, node);
+            if(distance < minDistance && node.getDistance() != Integer.MAX_VALUE) {
                 minDistance = distance;
                 nearestNode = node;
             }
@@ -178,10 +178,15 @@ public class Graph {
     public String toString() {
         String str = "Nodes:\n";
         for(Node node : this.nodes) {
-            str = str + node.getName() + " ";
+            str += (node.getName() + " ");
         }
         return str;
     }
+}
+
+
+public void drawGraph(Graph g, List<Node> path) {
+
 }
 public class Node {
     private char name;
