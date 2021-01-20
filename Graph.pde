@@ -34,22 +34,30 @@ public class Graph {
     }
 
     public Node getNode(char name) {
-        return nodes[(int) name - (int) 'a'];
+        return this.nodes[(int) name - (int) 'a'];
     }
 
     public Node getFirstNode() {
-        return nodes[0];
+        return this.nodes[0];
     }
 
     public Node getLastNode() {
-        return nodes[nodes.length - 1];
+        return this.nodes[nodes.length - 1];
+    }
+
+    public Node[] getNodes() {
+        return this.nodes;
+    }
+
+    public int[][] getTable() {
+        return this.table;
     }
 
     public int getDistance(Node a, Node b) {
         int indexA = (int) a.getName() - (int) 'a';
         int indexB = (int) b.getName() - (int) 'a';
 
-        return table[indexA][indexB];
+        return this.table[indexA][indexB];
     }
 
     public List<Node> getConnectedNodes(Node node) {

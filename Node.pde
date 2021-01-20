@@ -4,11 +4,14 @@ public class Node {
     private boolean finished;
     private Node source;
 
+    private PVector drawPosition;
+
     Node(char name) {
         this.name = name;
         this.finished = false;
         this.distance = Integer.MAX_VALUE;
         this.source = null;
+        this.drawPosition = new PVector();
     }
 
     public char getName() {
@@ -28,14 +31,22 @@ public class Node {
     }
 
     public boolean isFinished() {
-        return finished;
+        return this.finished;
     }
 
-    public void setSource(Node node) {
-        this.source = node;
+    public void setSource(Node source) {
+        this.source = source;
     }
 
     public Node getSource() {
         return this.source;
+    }
+
+    public void setDrawPosition(PVector drawPosition) {
+        this.drawPosition = drawPosition;
+    }
+
+    public PVector getDrawPosition() {
+        return this.drawPosition;
     }
 }
