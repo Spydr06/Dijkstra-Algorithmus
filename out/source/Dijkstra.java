@@ -25,6 +25,7 @@ public void setup() {
     Graph g = new Graph("graph1.csv");
 
     List<Node> path = getPath(g);    
+
     drawGraph(g, path);
     printNodeList(path, "Shortest path");
 }
@@ -35,7 +36,7 @@ public List<Node> getPath(Graph g) {
 
     start.setDistance(0);
     start.finish();
-    getPathLength(start, g);
+    calculateDijkstra(start, g);
     
     if(g.getLastNode().getDistance() == Integer.MAX_VALUE) {
         println("No path found connecting 'a' and '" + g.getLastNode().getName() + "'");
@@ -51,10 +52,11 @@ public List<Node> getPath(Graph g) {
         currentNode = currentNode.getSource();
     }
 
+    Collections.reverse(path);
     return path;
 }
 
-public void getPathLength(Node current, Graph g) {
+public void calculateDijkstra(Node current, Graph g) {
     List<Node> connectedNodes = g.getConnectedNodes(current);
 
     println("==> Entering Node '" + current.getName() + "'");
@@ -66,7 +68,7 @@ public void getPathLength(Node current, Graph g) {
 
         println("Checking Node '" + node.getName() + "'");
 
-        int distance = current.getDistance() + g.getDistance(current, node);
+        int distance = current.getDistance() + g.getDistanceBetween(current, node);
         if(node.getDistance() > distance) { 
             node.setDistance(distance);
             node.setSource(current);
@@ -78,7 +80,7 @@ public void getPathLength(Node current, Graph g) {
         if(g.getNearestNode(node).isFinished() && !(node == current.getSource() || node.isFinished())) {
             node.finish();
             println("Finished '" + node.getName() + "'");
-            getPathLength(node, g);
+            calculateDijkstra(node, g);
         }
     }
 }
@@ -99,7 +101,7 @@ public void drawGraph(Graph g, List<Node> path) {
     fill(0);
     textSize(20);
 
-    text("Kürzester Weg:\nLänge: " + g.getLastNode().getDistance() + "\nWeg: " + nodeListToString(path) , 0, 20);
+    text("Kürzester Weg\nLänge: " + g.getLastNode().getDistance() + "\nWeg: " + nodeListToString(path) , 0, 20);
 
     translate(width / 2, height / 2 + 50);
     textSize(20);
@@ -127,7 +129,6 @@ public void drawGraph(Graph g, List<Node> path) {
                 fill(c);
                 stroke(c);
 
-                //stroke(path.contains(nodes[i]) ? color(0, 200, 0) : color (0));
                 line(from.x, from.y, to.x, to.y);
                 text(table[i][j], (from.x + to.x) / 2.0f, (from.y + to.y) / 2.0f);
             }
@@ -139,16 +140,6 @@ public void drawGraph(Graph g, List<Node> path) {
 public class Graph {
     private int[][] table;
     private Node[] nodes;
-
-    public Graph(int[][] table) {
-        int numNodes = table.length;
-        this.nodes = new Node[numNodes];
-        this.table = table;
-
-        for(int i = 0; i < numNodes; i++) {
-            this.nodes[i] = new Node((char) ((int) 'a' + i));
-        }
-    }
 
     public Graph(String sourcePath) {
         Table csv = loadTable(sourcePath, "header");
@@ -189,7 +180,7 @@ public class Graph {
         return this.table;
     }
 
-    public int getDistance(Node a, Node b) {
+    public int getDistanceBetween(Node a, Node b) {
         int indexA = (int) a.getName() - (int) 'a';
         int indexB = (int) b.getName() - (int) 'a';
 
@@ -197,19 +188,17 @@ public class Graph {
     }
 
     public List<Node> getConnectedNodes(Node node) {
-        Map<Integer, Node> map = new TreeMap<Integer,Node>(); //Eine map mit allen verbunden Knoten als Werte und deren Distanzen als Schlüssel (TreeMap, weil die Einträge (im Gegensatz zu HashMaps) automatisch nach den Schlüsseln sortiert werden)
+        List<Node> connectedNodes = new ArrayList<Node>();
 
         for(int i = 0; i < nodes.length; i++) {
-            int distance = table[i][(int) node.getName() - (int) 'a'];
+            int distance = this.getDistanceBetween(node, nodes[i]);
             if(distance != 0) {
-                map.put(this.getDistance(node, nodes[i]), nodes[i]);
+                nodes[i].setSourceDistance(distance);
+                connectedNodes.add(nodes[i]);
             }
         }
 
-        List<Node> connectedNodes = new ArrayList<Node>();
-        for(int key : map.keySet()) {
-            connectedNodes.add(map.get(key));
-        }
+        Collections.sort(connectedNodes);
         return connectedNodes;
     }
 
@@ -218,7 +207,7 @@ public class Graph {
         int minDistance = Integer.MAX_VALUE;
 
         for(Node node : this.getConnectedNodes(source)) {
-            int distance = node.getDistance() + this.getDistance(source, node);
+            int distance = node.getDistance() + this.getDistanceBetween(source, node);
             if(distance < minDistance && node.getDistance() != Integer.MAX_VALUE) {
                 minDistance = distance;
                 nearestNode = node;
@@ -237,12 +226,13 @@ public class Graph {
         return str;
     }
 }
-public class Node {
+public class Node implements Comparable<Node> {
     private char name;
     private int distance;
     private boolean finished;
     private Node source;
 
+    private Integer sourceDistance;
     private PVector drawPosition;
 
     Node(char name) {
@@ -251,6 +241,7 @@ public class Node {
         this.distance = Integer.MAX_VALUE;
         this.source = null;
         this.drawPosition = new PVector();
+        this.sourceDistance = new Integer(0);
     }
 
     public char getName() {
@@ -281,12 +272,25 @@ public class Node {
         return this.source;
     }
 
+    public void setSourceDistance(Integer sourceDistance) {
+        this.sourceDistance = sourceDistance;
+    }
+
+    public Integer getSourceDistance() {
+        return this.sourceDistance;
+    }
+
     public void setDrawPosition(PVector drawPosition) {
         this.drawPosition = drawPosition;
     }
 
     public PVector getDrawPosition() {
         return this.drawPosition;
+    }
+
+    @Override
+    public int compareTo(Node node) {
+        return this.getSourceDistance().compareTo(node.getSourceDistance());
     }
 }
   public void settings() {  size(400, 500); }

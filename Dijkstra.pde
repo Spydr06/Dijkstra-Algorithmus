@@ -1,22 +1,23 @@
 import java.util.*;
 
-void setup() {
+void setup() { //Einstiegspunkt
     size(400, 500);
 
-    Graph g = new Graph("graph1.csv");
+    Graph g = new Graph("graph1.csv"); //Laden des Graphen
 
-    List<Node> path = getPath(g);    
-    drawGraph(g, path);
+    List<Node> path = getPath(g); //Berechnen des kürzesten Weges durch den Dijkstra-Algorithmus
+
+    drawGraph(g, path); //Zeichnen des "gelösten" Graphens
     printNodeList(path, "Shortest path");
 }
 
 List<Node> getPath(Graph g) {
-    List<Node> path = new ArrayList<Node>();
-    Node start = g.getFirstNode();
+    List<Node> path = new ArrayList<Node>(); //Liste aus allen Knoten im kürzesten Weg
+    Node start = g.getFirstNode(); //Startknoten
 
     start.setDistance(0);
     start.finish();
-    getPathLength(start, g);
+    calculateDijkstra(start, g); //startet das Berechnen des Kürzersten Weges
     
     if(g.getLastNode().getDistance() == Integer.MAX_VALUE) {
         println("No path found connecting 'a' and '" + g.getLastNode().getName() + "'");
@@ -32,10 +33,11 @@ List<Node> getPath(Graph g) {
         currentNode = currentNode.getSource();
     }
 
+    Collections.reverse(path);
     return path;
 }
 
-void getPathLength(Node current, Graph g) {
+void calculateDijkstra(Node current, Graph g) {
     List<Node> connectedNodes = g.getConnectedNodes(current);
 
     println("==> Entering Node '" + current.getName() + "'");
@@ -47,7 +49,7 @@ void getPathLength(Node current, Graph g) {
 
         println("Checking Node '" + node.getName() + "'");
 
-        int distance = current.getDistance() + g.getDistance(current, node);
+        int distance = current.getDistance() + g.getDistanceBetween(current, node);
         if(node.getDistance() > distance) { 
             node.setDistance(distance);
             node.setSource(current);
@@ -59,7 +61,7 @@ void getPathLength(Node current, Graph g) {
         if(g.getNearestNode(node).isFinished() && !(node == current.getSource() || node.isFinished())) {
             node.finish();
             println("Finished '" + node.getName() + "'");
-            getPathLength(node, g);
+            calculateDijkstra(node, g);
         }
     }
 }

@@ -1,9 +1,10 @@
-public class Node {
+public class Node implements Comparable<Node> {
     private char name;
     private int distance;
     private boolean finished;
     private Node source;
 
+    private Integer sourceDistance;
     private PVector drawPosition;
 
     Node(char name) {
@@ -12,6 +13,7 @@ public class Node {
         this.distance = Integer.MAX_VALUE;
         this.source = null;
         this.drawPosition = new PVector();
+        this.sourceDistance = new Integer(0);
     }
 
     public char getName() {
@@ -42,11 +44,24 @@ public class Node {
         return this.source;
     }
 
+    public void setSourceDistance(Integer sourceDistance) {
+        this.sourceDistance = sourceDistance;
+    }
+
+    public Integer getSourceDistance() {
+        return this.sourceDistance;
+    }
+
     public void setDrawPosition(PVector drawPosition) {
         this.drawPosition = drawPosition;
     }
 
     public PVector getDrawPosition() {
         return this.drawPosition;
+    }
+
+    @Override
+    public int compareTo(Node node) {
+        return this.getSourceDistance().compareTo(node.getSourceDistance());
     }
 }
