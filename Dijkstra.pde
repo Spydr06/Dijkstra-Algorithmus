@@ -2,7 +2,7 @@ import java.util.*;
 
 void setup() { //Einstiegspunkt
     size(400, 500);
-
+  
     Graph g = new Graph("graph1.csv"); //Laden des Graphen
 
     List<Node> path = getPath(g); //Berechnen des kürzesten Weges durch den Dijkstra-Algorithmus
@@ -84,7 +84,7 @@ void drawGraph(Graph g, List<Node> path) {
 
     text("Kürzester Weg\nLänge: " + g.getLastNode().getDistance() + "\nWeg: " + nodeListToString(path) , 0, 20);
 
-    translate(width / 2, height / 2 + 50);
+    translate(width / 2, height / 2 + 50); //<>//
     textSize(20);
 
     Node[] nodes = g.getNodes();
