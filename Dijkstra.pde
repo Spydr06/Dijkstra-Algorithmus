@@ -1,3 +1,8 @@
+/**
+GitHub:
+  https://github.com/Spydr06/Dijkstra-Algorithmus
+**/
+
 import java.util.*;
 
 void setup() { //Einstiegspunkt
