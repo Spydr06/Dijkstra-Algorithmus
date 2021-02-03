@@ -1,4 +1,4 @@
-import java.util.Comparable;
+import java.util.*;
 
 public class Node implements Comparable<Node> { //Klasse eines Knoten, Comparable wird implementiert, damit eine Liste aus Knoten sortierbar ist
     private char name;
