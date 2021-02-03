@@ -1,4 +1,16 @@
 /**
+Dies ist eine Programm zum Finden der kürzesten Strecke in 
+einem Graphen durch Benutzung des Dijkstra Algorithmus
+
+Gelöste Aufgaben: Schwierigere Aufgabe (Dijkstra-Algorithmus) mit allen Zusatzaufgaben.
+
+Achtung!
+- Das Programm kann momentan nur mit 52 Knoten rechnen, 
+  da die Knoten anhand eines chars gespeichert werden.
+- Negative Zahlen sind nicht unterstützt 
+- Es muss eine gültige Adjazenzmatrix gegeben sein, 
+  sonst KANN es zu Fehlern kommen.
+
 GitHub:
   https://github.com/Spydr06/Dijkstra-Algorithmus
 **/
@@ -24,7 +36,7 @@ List<Node> getPath(Graph g) {
     start.finish();
     calculateDijkstra(start, g); //startet das Berechnen des Kürzersten Weges
     
-    if(g.getLastNode().getDistance() == Integer.MAX_VALUE) {
+    if(g.getLastNode().getDistance() == Integer.MAX_VALUE) { //Herausfinden, ob es einen Weg gibt
         println("No path found connecting 'a' and '" + g.getLastNode().getName() + "'");
         path.clear();
         return path;
@@ -32,38 +44,39 @@ List<Node> getPath(Graph g) {
         println("The shortest distance between 'a' and '" + g.getLastNode().getName() + "' is " + g.getLastNode().getDistance());
     }
 
-    Node currentNode = g.getLastNode();
+    Node currentNode = g.getLastNode(); //Zurückverfolgen des gelösten Wegs
     while (currentNode != null) {
         path.add(currentNode);
         currentNode = currentNode.getSource();
     }
 
-    Collections.reverse(path);
+    Collections.reverse(path); //Umdrehen des Weges (=> Startpunkt am Anfang)
     return path;
 }
 
-void calculateDijkstra(Node current, Graph g) {
-    List<Node> connectedNodes = g.getConnectedNodes(current);
+void calculateDijkstra(Node current, Graph g) { //rekursive Methode zum Lösen des Dijkstra-Algorithmus
+    List<Node> connectedNodes = g.getConnectedNodes(current); //Alle mit current verbundenen Knoten
 
-    println("==> Entering Node '" + current.getName() + "'");
+    println("==> Entering Node '" + current.getName() + "'"); //debug
 
     for(Node node : connectedNodes) {
-        if(node == current.getSource() || node.isFinished()) {
+        if(node == current.getSource() || node.isFinished()) { //falls der Knoten die Quelle ist oder bereits abgeschlossen ist, ignorieren
             continue;
         }
 
-        println("Checking Node '" + node.getName() + "'");
+        println("Checking Node '" + node.getName() + "'"); //debug
 
         int distance = current.getDistance() + g.getDistanceBetween(current, node);
-        if(node.getDistance() > distance) { 
+        if(node.getDistance() > distance) { //ist die Distanz zwischen dem aktuellen Knoten und current kleiner, wird current als Quelle definiert 
             node.setDistance(distance);
             node.setSource(current);
-            println("Added Node '" + node.getName() + "' connected from Node '" + current.getName() + "' with distance " + node.getDistance());
+            println("Added Node '" + node.getName() + "' connected from Node '" + current.getName() + "' with distance " + node.getDistance()); //debug
         }
     }
 
     for(Node node : connectedNodes) {
-        if(g.getNearestNode(node).isFinished() && !(node == current.getSource() || node.isFinished())) {
+        if(g.getNearestNode(node).isFinished() && !(node == current.getSource() || node.isFinished())) { //falls der Knoten mit dem kürzesten Weg zu current abgeschlossen ist,                                                                                            
+                                                                                                         //gibt es keinen kürzeren Weg zu current mehr -> current abschließen
             node.finish();
             println("Finished '" + node.getName() + "'");
             calculateDijkstra(node, g);
@@ -71,11 +84,11 @@ void calculateDijkstra(Node current, Graph g) {
     }
 }
 
-void printNodeList(List<Node> nodes, String label) {
+void printNodeList(List<Node> nodes, String label) { //Hilfsfunktion zum ausdrucken einer Knotenliste
     println(label + ": " + nodeListToString(nodes));
 }
 
-String nodeListToString(List<Node> nodes) {
+String nodeListToString(List<Node> nodes) { //Hilfsfunktion zum konvertiren einer Knotenliste in einen String
     String str = "";
     for(Node node : nodes) {
         str += (node.getName() + " ");
@@ -83,7 +96,7 @@ String nodeListToString(List<Node> nodes) {
     return str;
 }
 
-void drawGraph(Graph g, List<Node> path) {
+void drawGraph(Graph g, List<Node> path) { //Funktion zum Zeichnen des gelösten Graphen
     fill(0);
     textSize(20);
 

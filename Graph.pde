@@ -1,10 +1,10 @@
 import java.util.*;
 
-public class Graph {
+public class Graph { //Klasse eines Graphen
     private int[][] table;
     private Node[] nodes;
 
-    public Graph(String sourcePath) {
+    public Graph(String sourcePath) { //Constructor
         Table csv = loadTable(sourcePath, "header");
         int numNodes = csv.getRowCount();
         
@@ -16,12 +16,19 @@ public class Graph {
             this.nodes[i] = new Node(name);
 
             for(int j = 0; j < numNodes; j++) {
-                table[i][j] = csv.getInt(j, Character.toString(name));
-                print(table[i][j] + " ");
+                int value = csv.getInt(j, Character.toString(name));
+                table[i][j] = value;
+                print(value+ " ");
+                
+                if(value < 0) { //Sicherheitscheck
+                   System.err.println("Illegal input value: " + value + ", negative values are not supported yet.");
+                }
             }
             print("\n");
         }
     }
+
+    //Getter und Setter
 
     public Node getNode(char name) {
         return this.nodes[(int) name - (int) 'a'];
@@ -43,14 +50,14 @@ public class Graph {
         return this.table;
     }
 
-    public int getDistanceBetween(Node a, Node b) {
+    public int getDistanceBetween(Node a, Node b) { //Hilfsfunktion zum Herausfinden der Distanz zwischen zwei Knoten
         int indexA = (int) a.getName() - (int) 'a';
         int indexB = (int) b.getName() - (int) 'a';
 
         return this.table[indexA][indexB];
     }
 
-    public List<Node> getConnectedNodes(Node node) {
+    public List<Node> getConnectedNodes(Node node) { //Hilfsfunktion zum Herausfinden der mit eiunem Knoten verbundenen Knoten
         List<Node> connectedNodes = new ArrayList<Node>();
 
         for(int i = 0; i < nodes.length; i++) {
@@ -65,7 +72,7 @@ public class Graph {
         return connectedNodes;
     }
 
-    public Node getNearestNode(Node source) {
+    public Node getNearestNode(Node source) { //Hilfsfunktion zum Herausfinden des nächsten Knoten
         Node nearestNode = null;
         int minDistance = Integer.MAX_VALUE;
 
@@ -81,7 +88,7 @@ public class Graph {
     }
 
     @Override
-    public String toString() {
+    public String toString() { //Druckbar machen, debug
         String str = "Nodes:\n";
         for(Node node : this.nodes) {
             str += (node.getName() + " ");

@@ -1,4 +1,6 @@
-public class Node implements Comparable<Node> {
+import java.util.Comparable;
+
+public class Node implements Comparable<Node> { //Klasse eines Knoten, Comparable wird implementiert, damit eine Liste aus Knoten sortierbar ist
     private char name;
     private int distance;
     private boolean finished;
@@ -7,7 +9,7 @@ public class Node implements Comparable<Node> {
     private Integer sourceDistance;
     private PVector drawPosition;
 
-    Node(char name) {
+    Node(char name) { //Constructor
         this.name = name;
         this.finished = false;
         this.distance = Integer.MAX_VALUE;
@@ -15,6 +17,8 @@ public class Node implements Comparable<Node> {
         this.drawPosition = new PVector();
         this.sourceDistance = new Integer(0);
     }
+
+    //Getter und Setter für die Variablen
 
     public char getName() {
         return this.name;
@@ -61,7 +65,7 @@ public class Node implements Comparable<Node> {
     }
 
     @Override
-    public int compareTo(Node node) {
+    public int compareTo(Node node) { //Wird aus java.util.Comparable überschrieben
         return this.getSourceDistance().compareTo(node.getSourceDistance());
     }
 }
